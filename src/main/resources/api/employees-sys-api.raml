@@ -1,0 +1,29 @@
+#%RAML 1.0
+title: employees-sys-api
+version: v1
+
+
+/employeedetails:
+  get:
+    description: this resource is to fetch and show all the employee details
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {"employees":[
+              {"employeeID":"1", "employeeName":"Tom Berry","designation":"SSE"},
+              {"employeeID":"2", "employeeName":"JAck Jones","designation":"SSE"}
+              ]}
+
+
+  /{employeeID}:
+    description: Return employee information on basis of EmployeeID
+    get:
+      responses: 
+        200:
+          body: 
+            application/json:
+              example:  |
+                {"employeeID":"1", "employeeName":"Tom Berry","designation":"BA"}
+              
