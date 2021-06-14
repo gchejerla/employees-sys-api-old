@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="inp" format="json">
+      <types:shape format="weave" example="examples/input.json"><![CDATA[%dw 2.0
+
+type inp = Array<{|  DESIGNATION: String,   EMPLOYEEID: String,   EMPLOYEENAME: String|}> {"example": "[{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"123\\\",\\\"EMPLOYEENAME\\\":\\\"GOPI\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"3456\\\",\\\"EMPLOYEENAME\\\":\\\"John\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"34543\\\",\\\"EMPLOYEENAME\\\":\\\"Aaron\\\"},{\\\"DESIGNATION\\\":\\\"SE\\\",\\\"EMPLOYEEID\\\":\\\"34543\\\",\\\"EMPLOYEENAME\\\":\\\"casey\\\"},{\\\"DESIGNATION\\\":\\\"BA\\\",\\\"EMPLOYEEID\\\":\\\"1\\\",\\\"EMPLOYEENAME\\\":\\\"Tom Berry\\\"},{\\\"DESIGNATION\\\":\\\"BA\\\",\\\"EMPLOYEEID\\\":\\\"1\\\",\\\"EMPLOYEENAME\\\":\\\"Tom Berry\\\"},{\\\"DESIGNATION\\\":\\\"BA\\\",\\\"EMPLOYEEID\\\":\\\"456\\\",\\\"EMPLOYEENAME\\\":\\\"Tom\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"6783\\\",\\\"EMPLOYEENAME\\\":\\\"CHAND\\\"},{\\\"DESIGNATION\\\":\\\"[SSE, SSE]\\\",\\\"EMPLOYEEID\\\":\\\"[6784, 6785]\\\",\\\"EMPLOYEENAME\\\":\\\"[Cdjks, CHskld]\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"6783\\\",\\\"EMPLOYEENAME\\\":\\\"CHAND\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"6783\\\",\\\"EMPLOYEENAME\\\":\\\"CHAND\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"6783\\\",\\\"EMPLOYEENAME\\\":\\\"CHAND\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"6789\\\",\\\"EMPLOYEENAME\\\":\\\"CHAND\\\"},{\\\"DESIGNATION\\\":\\\"SSE\\\",\\\"EMPLOYEEID\\\":\\\"6789\\\",\\\"EMPLOYEENAME\\\":\\\"CHAND\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="out" format="json">
+      <types:shape format="weave" example="examples/output.json"><![CDATA[%dw 2.0
+
+type out = Array<{|  empdesignation: String,   empid: String,   empname: String|}> {"example": "[{\\\"empdesignation\\\":\\\"SSE\\\",\\\"empid\\\":\\\"123\\\",\\\"empname\\\":\\\"GOPI\\\"},{\\\"empdesignation\\\":\\\"SSE\\\",\\\"empid\\\":\\\"125\\\",\\\"empname\\\":\\\"GOPI\\\"},{\\\"empdesignation\\\":\\\"SSE\\\",\\\"empid\\\":\\\"124\\\",\\\"empname\\\":\\\"GOPI\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#c80e23a3-ee88-477a-b7a9-37ec16d7a41c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="inp"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="out"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

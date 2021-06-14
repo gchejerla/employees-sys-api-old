@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
     <http:listener-config name="employees-sys-api-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8081" />
+        <http:listener-connection host="0.0.0.0" port="8081" protocol="HTTPS">
+            <tls:context>
+                <tls:key-store type="jks" path="GCC.jks" keyPassword="changeit" password="changeit" />
+            </tls:context>
+        </http:listener-connection>
     </http:listener-config>
     <apikit:config name="employees-sys-api-config" api="employees-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <db:config name="Database_Config" doc:name="Database Config" doc:id="648ad5a9-0680-495f-8f26-55cf82f9b1de" >
-		<db:generic-connection url="jdbc:snowflake://sz30135.ap-south-1.aws.snowflakecomputing.com/?user=MuleTrainingGCC&amp;password=Mule@123&amp;db=DEMO_DB&amp;schema=public" driverClassName="net.snowflake.client.jdbc.SnowflakeDriver" user="MuleTrainingGCC" password="Mule@123" />
-	</db:config>
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="648ad5a9-0680-495f-8f26-55cf82f9b1de">
+        <db:generic-connection url="jdbc:snowflake://sz30135.ap-south-1.aws.snowflakecomputing.com/?user=MuleTrainingGCC&amp;password=Mule@123&amp;db=DEMO_DB&amp;schema=public" driverClassName="net.snowflake.client.jdbc.SnowflakeDriver" user="${s.username}" password="${secure::s.password}" />
+    </db:config>
+    <configuration-properties doc:name="Configuration properties" doc:id="c31384ea-a802-4822-b132-854511306877" file="qa.properties" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="546abc9a-a606-4508-9cb4-1a49a720fd81" file="${env}.properties" key="${key}" />
 	<flow name="employees-sys-api-main">
         <http:listener config-ref="employees-sys-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -22,7 +27,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
         <apikit:router config-ref="employees-sys-api-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -35,7 +40,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -48,7 +53,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -61,7 +66,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -74,7 +79,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -87,7 +92,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -114,7 +119,7 @@ output application/json
         <apikit:console config-ref="employees-sys-api-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -129,63 +134,115 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\employeedetails:employees-sys-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="e604d509-75b7-4cb0-ac04-88027539d4cf" message="start of employees flow "/>
-		<db:select doc:name="Select" doc:id="3f5ec232-d582-4005-99a1-e5333b459a7d" config-ref="Database_Config">
-			<db:sql ><![CDATA[select * from "DEMO_DB"."PUBLIC"."EMPLOYEES"]]></db:sql>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="d3b4df48-d081-4a8e-945f-bd142bcccdf2" >
+        <logger level="INFO" doc:name="Logger" doc:id="e604d509-75b7-4cb0-ac04-88027539d4cf" message="start of employees flow " />
+        <db:select doc:name="Select" doc:id="3f5ec232-d582-4005-99a1-e5333b459a7d" config-ref="Database_Config">
+            <db:sql><![CDATA[select * from "DEMO_DB"."PUBLIC"."EMPLOYEES"]]></db:sql>
+        </db:select>
+        <ee:transform doc:name="Transform Message" doc:id="d3b4df48-d081-4a8e-945f-bd142bcccdf2">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="c80e23a3-ee88-477a-b7a9-37ec16d7a41c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload map ( payload01 , indexOfPayload01 ) -> {
+	empdesignation: payload01.DESIGNATION,
+	empid: payload01.EMPLOYEEID,
+	empname: payload01.EMPLOYEENAME
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
     </flow>
     <flow name="get:\employeedetails\(employeeID):employees-sys-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+        <ee:transform>
             <ee:variables>
                 <ee:set-variable variableName="employeeID">attributes.uriParams.'employeeID'</ee:set-variable>
             </ee:variables>
         </ee:transform>
         <logger level="INFO" doc:name="Logger" doc:id="dbc329bc-79fe-4907-88ab-464a3fc9144a" message="startb flow" />
-		<db:select doc:name="Select" doc:id="cc3d98b0-f690-4c68-b92d-3d53cfc15456" config-ref="Database_Config" >
-			<db:sql ><![CDATA[  select EMPLOYEEID, EMPLOYEENAME, DESIGNATION from "DEMO_DB"."PUBLIC"."EMPLOYEES" where EMPLOYEEID=:empid]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{
+        <db:select doc:name="Select" doc:id="cc3d98b0-f690-4c68-b92d-3d53cfc15456" config-ref="Database_Config">
+            <db:sql><![CDATA[select EMPLOYEEID, EMPLOYEENAME, DESIGNATION from "DEMO_DB"."PUBLIC"."EMPLOYEES" where EMPLOYEEID=:empid]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
 	empid: vars.employeeID
 }]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="99923162-1196-4b33-8fd2-f3798e4e6279" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+        </db:select>
+        <ee:transform doc:name="Transform Message" doc:id="99923162-1196-4b33-8fd2-f3798e4e6279">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<choice doc:name="Choice" doc:id="1b5a654d-73ed-4d19-b442-a5a0a7823819" >
-			<when expression="#[(sizeOf(payload)) != 0]">
-				<ee:transform doc:name="Transform Message" doc:id="60d68c8c-17a3-4b32-9deb-a746b47758b8">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+            </ee:message>
+        </ee:transform>
+        <choice doc:name="Choice" doc:id="1b5a654d-73ed-4d19-b442-a5a0a7823819">
+            <when expression="#[(sizeOf(payload)) != 0]">
+                <ee:transform doc:name="Transform Message" doc:id="60d68c8c-17a3-4b32-9deb-a746b47758b8">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-			</when>
-			<otherwise >
-				<ee:transform doc:name="Transform Message" doc:id="0eb09d08-57a0-4c21-9e53-555492701350" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+                    </ee:message>
+                </ee:transform>
+            </when>
+            <otherwise>
+                <ee:transform doc:name="Transform Message" doc:id="0eb09d08-57a0-4c21-9e53-555492701350">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
 	"Message": vars.employeeID ++ " employee details are not available"
 }]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</otherwise>
-		</choice>
+                    </ee:message>
+                </ee:transform>
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="post:\postemployeedetails:application\json:employees-sys-api-config">
+        <logger level="INFO" doc:name="Logger" doc:id="26cefc24-3398-45d8-aa6c-4b153155b1be" message="#[p('testlog')]"/>
+		<db:insert doc:name="Insert" doc:id="5fb008a8-75c1-4fd1-b09c-f40adb136aaa" config-ref="Database_Config">
+            <db:sql><![CDATA[INSERT INTO "DEMO_DB"."PUBLIC"."EMPLOYEES" ("EMPLOYEEID" , "EMPLOYEENAME" , "DESIGNATION") VALUES (:empid, :empname, :empdesignation)]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+	empid: payload.employeeID,
+	empname: payload.employeeName,
+	empdesignation: payload.designation
+}]]]></db:input-parameters>
+        </db:insert>
+        <ee:transform doc:name="Transform Message" doc:id="00d0318c-d0ff-4a9f-bcd9-2adc85ec6c1e">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+
+{"status": "posted employee data to snowflake"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\postbulkemployeedetails:application\json:employees-sys-api-config">
+        <db:bulk-insert doc:name="Bulk insert" doc:id="e85f69be-70c4-4a98-9f83-9b9b5868eddf" >
+			<db:bulk-input-parameters ><![CDATA[#[{
+	empid: payload.employeeID,
+	empname: payload.employeeName,
+	empdesignation: payload.designation
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[INSERT INTO "DEMO_DB"."PUBLIC"."EMPLOYEES" ("EMPLOYEEID" , "EMPLOYEENAME" , "DESIGNATION") VALUES (:empid, :empname, :empdesignation)]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "posted employee data to snowflake successfully"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
     </flow>
 </mule>

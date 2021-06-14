@@ -4,17 +4,12 @@ version: v1
 
 
 /employeedetails:
-  get:
-    description: this resource is to fetch and show all the employee details
+  get:    
     responses:
       200:
         body:
           application/json:
-            example: |
-              {"employees":[
-              {"employeeID":"1", "employeeName":"Tom Berry","designation":"SSE"},
-              {"employeeID":"2", "employeeName":"JAck Jones","designation":"SSE"}
-              ]}
+            example: !include file.json
 
 
   /{employeeID}:
@@ -26,4 +21,33 @@ version: v1
             application/json:
               example:  |
                 {"employeeID":"1", "employeeName":"Tom Berry","designation":"BA"}
-              
+
+/postemployeedetails:
+  post:
+    body:
+      application/json:
+        example:
+          value: {"employeeID":"1", "employeeName":"Tom Berry","designation":"BA"}
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              value: {"status": "posted employee data to snowflake"}
+  
+/postbulkemployeedetails:
+  post:
+    body:
+      application/json:
+        example:
+          value: [{"employeeID":"1", "employeeName":"Tom Berry","designation":"BA"}, {"employeeID":"2", "employeeName":"Tom","designation":"BA"}]
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              value: {"status": "posted employee data to snowflake successfully"}
+        
+
+
+

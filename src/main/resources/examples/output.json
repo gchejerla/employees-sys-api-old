@@ -1,0 +1,17 @@
+[
+    {
+        "empdesignation": "SSE",
+        "empid": "123",
+        "empname": "GOPI"
+    },
+    {
+        "empdesignation": "SSE",
+        "empid": "125",
+        "empname": "GOPI"
+    },
+    {
+        "empdesignation": "SSE",
+        "empid": "124",
+        "empname": "GOPI"
+    }
+]

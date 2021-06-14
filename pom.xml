@@ -36,6 +36,7 @@
 							<artifactId>snowflake-jdbc</artifactId>
 						</sharedLibrary>
 					</sharedLibraries>
+					<classifier>mule-application</classifier>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -70,6 +71,18 @@
 			<groupId>net.snowflake</groupId>
 			<artifactId>snowflake-jdbc</artifactId>
 			<version>3.13.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.connectors</groupId>
+			<artifactId>mule-salesforce-connector</artifactId>
+			<version>10.10.5</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.modules</groupId>
+			<artifactId>mule-secure-configuration-property-module</artifactId>
+			<version>1.2.3</version>
+			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>
 
