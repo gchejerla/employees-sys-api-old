@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
     </http:listener-config>
     <apikit:config name="employees-sys-api-config" api="employees-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <db:config name="Database_Config" doc:name="Database Config" doc:id="648ad5a9-0680-495f-8f26-55cf82f9b1de">
-        <db:generic-connection url="jdbc:snowflake://sz30135.ap-south-1.aws.snowflakecomputing.com/?user=MuleTrainingGCC&amp;password=Mule@123&amp;db=DEMO_DB&amp;schema=public" driverClassName="net.snowflake.client.jdbc.SnowflakeDriver" user="${s.username}" password="${secure::s.password}" />
+        <db:generic-connection url="jdbc:snowflake://sz30135.ap-south-1.aws.snowflakecomputing.com/?" driverClassName="net.snowflake.client.jdbc.SnowflakeDriver" user="${s.username}" password="${secure::s.password}" />
     </db:config>
     <configuration-properties doc:name="Configuration properties" doc:id="c31384ea-a802-4822-b132-854511306877" file="qa.properties" />
 	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="546abc9a-a606-4508-9cb4-1a49a720fd81" file="${env}.properties" key="${key}" />
@@ -151,11 +151,11 @@ payload]]></ee:set-payload>
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload map ( payload01 , indexOfPayload01 ) -> {
+(payload map ( payload01 , indexOfPayload01 ) -> {
 	empdesignation: payload01.DESIGNATION,
 	empid: payload01.EMPLOYEEID,
 	empname: payload01.EMPLOYEENAME
-}]]></ee:set-payload>
+}) groupBy $.empdesignation]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
     </flow>
