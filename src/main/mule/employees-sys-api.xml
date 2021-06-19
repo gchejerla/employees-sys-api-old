@@ -226,13 +226,22 @@ output application/json
         </ee:transform>
     </flow>
     <flow name="post:\postbulkemployeedetails:application\json:employees-sys-api-config">
-        <db:bulk-insert doc:name="Bulk insert" doc:id="e85f69be-70c4-4a98-9f83-9b9b5868eddf" >
-			<db:bulk-input-parameters ><![CDATA[#[{
-	empid: payload.employeeID,
-	empname: payload.employeeName,
-	empdesignation: payload.designation
-}]]]></db:bulk-input-parameters>
-			<db:sql ><![CDATA[INSERT INTO "DEMO_DB"."PUBLIC"."EMPLOYEES" ("EMPLOYEEID" , "EMPLOYEENAME" , "DESIGNATION") VALUES (:empid, :empname, :empdesignation)]]></db:sql>
+		<ee:transform doc:name="Transform Message" doc:id="4b9570e8-237f-4fa2-ac7a-e64a2b43d174" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+(payload map ( payload01 , indexOfPayload01 ) -> {
+	EMPLOYEEID: payload01.employeeID,
+	
+	EMPLOYEENAME: payload01.employeeName,
+	
+	DESIGNATION: payload01.designation
+}) ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="e85f69be-70c4-4a98-9f83-9b9b5868eddf" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO "DEMO_DB"."PUBLIC"."EMPLOYEES" ("EMPLOYEEID" , "EMPLOYEENAME" , "DESIGNATION") values (:EMPLOYEEID , :EMPLOYEENAME , :DESIGNATION) ]]></db:sql>
 		</db:bulk-insert>
 		<ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
             <ee:message>
